@@ -279,6 +279,87 @@ ensure_account_credentials (GoaIdentityService *self,
 }
 
 static void
+on_identity_renewed_for_renew (GoaIdentityManager *manager,
+                               GAsyncResult       *result,
+                               GTask              *task)
+{
+  GoaIdentityService *self;
+  GDBusMethodInvocation *invocation;
+  GError *error;
+
+  self = GOA_IDENTITY_SERVICE (g_task_get_source_object (task));
+  invocation = G_DBUS_METHOD_INVOCATION (g_task_get_task_data (task));
+
+  error = NULL;
+  goa_identity_manager_renew_identity_finish (manager, result, &error);
+  if (error != NULL)
+    {
+      g_debug ("GoaIdentityService: Identity could not be renewed: %s", error->message);
+      g_dbus_method_invocation_take_error (invocation, error);
+      goto out;
+    }
+
+  goa_identity_service_manager_complete_renew (GOA_IDENTITY_SERVICE_MANAGER (self), invocation);
+
+ out:
+  g_object_unref (task);
+}
+
+static void
+on_got_identity_for_renew (GoaIdentityManager *manager,
+                           GAsyncResult       *result,
+                           GTask              *task)
+{
+  GoaIdentityService *self;
+  GDBusMethodInvocation *invocation;
+  GError *error;
+  GoaIdentity *identity = NULL;
+
+  self = GOA_IDENTITY_SERVICE (g_task_get_source_object (task));
+  invocation = G_DBUS_METHOD_INVOCATION (g_task_get_task_data (task));
+
+  error = NULL;
+  identity = goa_identity_manager_get_identity_finish (manager, result, &error);
+  if (error != NULL)
+    {
+      g_debug ("GoaIdentityService: Identity could not be renewed: %s", error->message);
+      g_dbus_method_invocation_take_error (invocation, error);
+      goto out;
+    }
+
+  goa_identity_manager_renew_identity (self->priv->identity_manager,
+                                       identity,
+                                       NULL,
+                                       (GAsyncReadyCallback) on_identity_renewed_for_renew,
+                                       self);
+
+ out:
+  g_clear_object (&identity);
+  g_object_unref (task);
+}
+
+static gboolean
+goa_identity_service_handle_renew (GoaIdentityServiceManager *manager,
+                                   GDBusMethodInvocation     *invocation,
+                                   const char                *identifier)
+{
+  GoaIdentityService *self = GOA_IDENTITY_SERVICE (manager);
+  GTask *task;
+
+  task = g_task_new (self, NULL, NULL, NULL);
+  g_task_set_task_data (task, g_object_ref (invocation), g_object_ref);
+
+  goa_identity_manager_get_identity (self->priv->identity_manager,
+                                     identifier,
+                                     NULL,
+                                     (GAsyncReadyCallback) on_got_identity_for_renew,
+                                     g_object_ref (task));
+
+  g_object_unref (task);
+  return TRUE;
+}
+
+static void
 on_sign_in_handled (GoaIdentityService    *self,
                     GAsyncResult          *result,
                     GDBusMethodInvocation *invocation)
@@ -653,6 +734,7 @@ goa_identity_service_handle_exchange_secret_keys (GoaIdentityServiceManager *man
 static void
 identity_service_manager_interface_init (GoaIdentityServiceManagerIface *interface)
 {
+  interface->handle_renew = goa_identity_service_handle_renew;
   interface->handle_sign_in = goa_identity_service_handle_sign_in;
   interface->handle_sign_out = goa_identity_service_handle_sign_out;
   interface->handle_exchange_secret_keys = goa_identity_service_handle_exchange_secret_keys;
