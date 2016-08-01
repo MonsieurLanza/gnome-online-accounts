@@ -714,9 +714,9 @@ goa_identity_service_finalize (GObject *object)
 }
 
 static void
-on_identity_renewed (GoaIdentityManager *manager,
-                     GAsyncResult       *result,
-                     GoaIdentityService *self)
+on_identity_renewed_for_needs_renewal (GoaIdentityManager *manager,
+                                       GAsyncResult       *result,
+                                       GoaIdentityService *self)
 {
   GError *error;
 
@@ -759,7 +759,7 @@ on_identity_needs_renewal (GoaIdentityManager *identity_manager,
                                        identity,
                                        NULL,
                                        (GAsyncReadyCallback)
-                                       on_identity_renewed,
+                                       on_identity_renewed_for_needs_renewal,
                                        self);
 
  out:
