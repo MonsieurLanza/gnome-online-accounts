@@ -1631,7 +1631,7 @@ sign_in_thread (GTask               *task,
   const char *identifier;
   const char *password;
   const char *preauth_source;
-  char *object_path;
+  char *object_path = NULL;
   GError *error;
 
   identifier = g_task_get_source_tag (task);
@@ -1641,9 +1641,16 @@ sign_in_thread (GTask               *task,
   error = NULL;
   object_path = sign_in_identity_sync (self, identifier, password, preauth_source, cancellable, &error);
   if (object_path == NULL)
-    g_task_return_error (task, error);
-  else
-    g_task_return_pointer (task, object_path, NULL);
+    {
+      g_task_return_error (task, error);
+      goto out;
+    }
+
+  g_task_return_pointer (task, object_path, g_free);
+  object_path = NULL;
+
+ out:
+  g_free (object_path);
 }
 
 
