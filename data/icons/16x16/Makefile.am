@@ -3,6 +3,7 @@ NULL =
 icondir = $(datadir)/icons/hicolor/16x16/apps
 icon_DATA =				\
 	goa-account.png			\
+    goa-account-cozycloud.png	\
 	goa-account-facebook.png	\
 	goa-account-flickr.png		\
 	goa-account-google.png		\

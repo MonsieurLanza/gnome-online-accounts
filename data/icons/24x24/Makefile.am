@@ -3,6 +3,7 @@ NULL =
 icondir = $(datadir)/icons/hicolor/24x24/apps
 icon_DATA = 				\
 	goa-account.png			\
+    goa-account-cozycloud.png	\
 	goa-account-facebook.png	\
 	goa-account-google.png		\
 	goa-account-msn.png		\
@@ -13,7 +14,7 @@ icon_DATA = 				\
 	$(NULL)
 
 EXTRA_DIST = \
-	$(icon_DATA)
+	$(icon_DATA)s
 
 clean-local :
 	rm -f *~
