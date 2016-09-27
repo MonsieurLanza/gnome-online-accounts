@@ -302,6 +302,17 @@ if test "$enable_owncloud" != "no"; then
   AC_DEFINE(GOA_OWNCLOUD_ENABLED, 1, [Enable ownCloud data provider])
 fi
 
+# Cozy Cloud
+AC_DEFINE(GOA_COZYCLOUD_NAME, ["cozycloud"], [ProviderType and extension point name])
+AC_ARG_ENABLE([cozycloud],
+              [AS_HELP_STRING([--enable-cozycloud],
+              [Enable Cozy Cloud provider])],
+              [],
+              [enable_cozycloud=yes])
+if test "$enable_cozycloud" != "no"; then
+  AC_DEFINE(GOA_COZYCLOUD_ENABLED, 1, [Enable Cozy Cloud data provider])
+fi
+
 # Facebook
 AC_DEFINE(GOA_FACEBOOK_NAME, ["facebook"], [ProviderType and extension point name])
 AC_ARG_ENABLE([facebook], [AS_HELP_STRING([--enable-facebook],

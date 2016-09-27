@@ -35,6 +35,7 @@
 #include "goapocketprovider.h"
 #include "goamediaserverprovider.h"
 #include "goalastfmprovider.h"
+#include "goacozycloudprovider.h"
 
 #ifdef GOA_KERBEROS_ENABLED
 #include "goakerberosprovider.h"
@@ -988,6 +989,9 @@ static struct
 #endif
 #ifdef GOA_TELEPATHY_ENABLED
   { GOA_TELEPATHY_NAME, goa_telepathy_factory_get_type },
+#endif
+#ifdef GOA_COZYCLOUD_ENABLED
+  { GOA_COZYCLOUD_NAME, goa_cozycloud_provider_get_type },
 #endif
   { NULL, NULL }
 };
